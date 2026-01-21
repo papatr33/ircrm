@@ -21,12 +21,19 @@ interface ImportResult {
   errors: string[]
 }
 
+export interface SheetInfo {
+  name: string
+  rowCount: number
+}
+
 // Parse Excel date to YYYY-MM-DD format
 function parseExcelDate(value: unknown): string | null {
   if (!value) return null
   
   // If it's a number (Excel date serial number)
   if (typeof value === 'number') {
+    // Excel dates are days since 1900-01-01 (with a bug for 1900 leap year)
+    // Use XLSX's built-in parser
     const date = XLSX.SSF.parse_date_code(value)
     if (date) {
       const year = date.y
@@ -36,13 +43,26 @@ function parseExcelDate(value: unknown): string | null {
     }
   }
   
-  // If it's a string, try to parse it
+  // If it's a string that looks like a number (Excel serial converted to string)
   if (typeof value === 'string') {
-    const dateStr = value.trim()
-    if (!dateStr) return null
+    const trimmed = value.trim()
+    if (!trimmed) return null
+    
+    // Check if it's a pure number (Excel serial date)
+    const numValue = parseFloat(trimmed)
+    if (!isNaN(numValue) && numValue > 40000 && numValue < 60000) {
+      // Likely an Excel serial date (covers years ~2009-2064)
+      const date = XLSX.SSF.parse_date_code(numValue)
+      if (date) {
+        const year = date.y
+        const month = String(date.m).padStart(2, '0')
+        const day = String(date.d).padStart(2, '0')
+        return `${year}-${month}-${day}`
+      }
+    }
     
     // Try parsing various date formats
-    const parsedDate = new Date(dateStr)
+    const parsedDate = new Date(trimmed)
     if (!isNaN(parsedDate.getTime())) {
       const year = parsedDate.getFullYear()
       const month = String(parsedDate.getMonth() + 1).padStart(2, '0')
@@ -65,6 +85,7 @@ function parseExcelDate(value: unknown): string | null {
 // Parse priority value
 function parsePriority(value: unknown): number | null {
   if (!value) return null
+  if (value === 'N/A' || value === 'n/a' || value === '-') return null
   
   const num = typeof value === 'number' ? value : parseInt(String(value).trim())
   if (isNaN(num) || num < 1 || num > 5) return null
@@ -105,33 +126,80 @@ const columnMappings: Record<string, keyof ImportedContact> = {
   'org': 'institution',
   'firm': 'institution',
   'fund': 'institution',
-  'lastinteraction': 'last_interaction_date',
+  // Date columns - only columns that are actual dates
+  'dateoflastinteraction': 'last_interaction_date',
+  'date': 'last_interaction_date',
   'lastinteractiondate': 'last_interaction_date',
-  'lastcontact': 'last_interaction_date',
-  'lastcontacted': 'last_interaction_date',
+  'lastcontactdate': 'last_interaction_date',
   'interactiondate': 'last_interaction_date',
+  // Priority columns - including the typo "priorty"
   'priority': 'priority',
+  'priorty': 'priority',  // Common typo
   'rank': 'priority',
   'importance': 'priority',
 }
 
-// Parse uploaded Excel file
-export function parseExcelFile(file: File): Promise<Record<string, unknown>[]> {
+// Extra columns that should be appended to notes/details
+const extraNotesColumns = [
+  'lastinteraction',      // "Last interaction" text description
+  'documentsprovided',    // "documents provided"
+  'documents',
+]
+
+// Get list of sheets from Excel file
+export function getExcelSheets(file: File): Promise<SheetInfo[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     
     reader.onload = (e) => {
       try {
         const data = e.target?.result
-        const workbook = XLSX.read(data, { type: 'array', cellDates: true })
+        const workbook = XLSX.read(data, { type: 'array' })
         
-        // Get first sheet
-        const sheetName = workbook.SheetNames[0]
-        const sheet = workbook.Sheets[sheetName]
+        const sheets: SheetInfo[] = workbook.SheetNames
+          .filter(name => name.toLowerCase() !== 'definitions') // Skip definitions sheet
+          .map(name => {
+            const sheet = workbook.Sheets[name]
+            const jsonData = XLSX.utils.sheet_to_json(sheet)
+            return { name, rowCount: jsonData.length }
+          })
+          .filter(sheet => sheet.rowCount > 0) // Only sheets with data
         
-        // Convert to JSON with raw values
+        resolve(sheets)
+      } catch (error) {
+        reject(new Error('Failed to parse Excel file'))
+      }
+    }
+    
+    reader.onerror = () => reject(new Error('Failed to read file'))
+    reader.readAsArrayBuffer(file)
+  })
+}
+
+// Parse uploaded Excel file with sheet selection
+export function parseExcelFile(file: File, sheetName?: string): Promise<Record<string, unknown>[]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    
+    reader.onload = (e) => {
+      try {
+        const data = e.target?.result
+        const workbook = XLSX.read(data, { type: 'array' })
+        
+        // If sheetName provided, use that; otherwise find first data sheet
+        let targetSheet = sheetName
+        if (!targetSheet) {
+          // Skip "Definitions" sheet and find first data sheet
+          targetSheet = workbook.SheetNames.find(
+            name => name.toLowerCase() !== 'definitions'
+          ) || workbook.SheetNames[0]
+        }
+        
+        const sheet = workbook.Sheets[targetSheet]
+        
+        // Convert to JSON - use raw:true to get actual values including numbers
         const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { 
-          raw: false,
+          raw: true,
           defval: null 
         })
         
@@ -149,8 +217,41 @@ export function parseExcelFile(file: File): Promise<Record<string, unknown>[]> {
   })
 }
 
+// Parse all sheets at once
+export function parseAllSheets(file: File): Promise<{ sheetName: string; data: Record<string, unknown>[] }[]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    
+    reader.onload = (e) => {
+      try {
+        const data = e.target?.result
+        const workbook = XLSX.read(data, { type: 'array' })
+        
+        const allData = workbook.SheetNames
+          .filter(name => name.toLowerCase() !== 'definitions')
+          .map(sheetName => {
+            const sheet = workbook.Sheets[sheetName]
+            const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { 
+              raw: true,
+              defval: null 
+            })
+            return { sheetName, data: jsonData }
+          })
+          .filter(sheet => sheet.data.length > 0)
+        
+        resolve(allData)
+      } catch (error) {
+        reject(new Error('Failed to parse Excel file'))
+      }
+    }
+    
+    reader.onerror = () => reject(new Error('Failed to read file'))
+    reader.readAsArrayBuffer(file)
+  })
+}
+
 // Map raw data to our contact format
-export function mapToContacts(rawData: Record<string, unknown>[]): ImportedContact[] {
+export function mapToContacts(rawData: Record<string, unknown>[], sourceSheet?: string): ImportedContact[] {
   return rawData.map((row) => {
     const contact: ImportedContact = {
       name: '',
@@ -163,8 +264,13 @@ export function mapToContacts(rawData: Record<string, unknown>[]): ImportedConta
       priority: null,
     }
     
+    // Collect extra notes from unmapped columns
+    const extraNotes: string[] = []
+    
     // Map columns based on header names
     for (const [key, value] of Object.entries(row)) {
+      if (!value) continue
+      
       const normalizedKey = normalizeColumnName(key)
       const fieldName = columnMappings[normalizedKey]
       
@@ -175,11 +281,34 @@ export function mapToContacts(rawData: Record<string, unknown>[]): ImportedConta
           contact.last_interaction_date = parseExcelDate(value)
         } else if (fieldName === 'priority') {
           contact.priority = parsePriority(value)
+        } else if (fieldName === 'details') {
+          // Append to details instead of replacing
+          const textValue = String(value).trim()
+          if (textValue) {
+            extraNotes.push(textValue)
+          }
         } else {
           const stringValue = value ? String(value).trim() : null
           contact[fieldName] = stringValue || null
         }
+      } else if (extraNotesColumns.includes(normalizedKey)) {
+        // Add extra info to notes
+        const textValue = String(value).trim()
+        if (textValue) {
+          const label = key.trim()
+          extraNotes.push(`${label}: ${textValue}`)
+        }
       }
+    }
+    
+    // Add source sheet to notes if provided
+    if (sourceSheet) {
+      extraNotes.unshift(`[${sourceSheet}]`)
+    }
+    
+    // Combine all notes
+    if (extraNotes.length > 0) {
+      contact.details = extraNotes.join('\n')
     }
     
     return contact

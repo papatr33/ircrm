@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { parseExcelFile, mapToContacts, importContacts } from '@/lib/import'
-import { Upload, FileSpreadsheet, X, Loader2, CheckCircle, AlertCircle, Info } from 'lucide-react'
+import { parseExcelFile, parseAllSheets, getExcelSheets, mapToContacts, importContacts, SheetInfo } from '@/lib/import'
+import { Upload, FileSpreadsheet, X, Loader2, CheckCircle, AlertCircle, Info, Layers } from 'lucide-react'
 
 interface ExcelImportProps {
   isOpen: boolean
@@ -10,7 +10,7 @@ interface ExcelImportProps {
   onImportComplete: () => void
 }
 
-type ImportStep = 'upload' | 'preview' | 'importing' | 'complete'
+type ImportStep = 'upload' | 'select-sheets' | 'preview' | 'importing' | 'complete'
 
 interface PreviewContact {
   name: string
@@ -27,6 +27,8 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [step, setStep] = useState<ImportStep>('upload')
   const [file, setFile] = useState<File | null>(null)
+  const [sheets, setSheets] = useState<SheetInfo[]>([])
+  const [selectedSheets, setSelectedSheets] = useState<string[]>([])
   const [previewData, setPreviewData] = useState<PreviewContact[]>([])
   const [importing, setImporting] = useState(false)
   const [progress, setProgress] = useState({ message: '', percent: 0 })
@@ -36,6 +38,8 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
   const resetState = () => {
     setStep('upload')
     setFile(null)
+    setSheets([])
+    setSelectedSheets([])
     setPreviewData([])
     setImporting(false)
     setProgress({ message: '', percent: 0 })
@@ -77,12 +81,60 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
     setFile(selectedFile)
 
     try {
-      const rawData = await parseExcelFile(selectedFile)
-      const contacts = mapToContacts(rawData)
-      setPreviewData(contacts)
-      setStep('preview')
+      // Get list of sheets
+      const sheetList = await getExcelSheets(selectedFile)
+      
+      if (sheetList.length === 0) {
+        setError('No data sheets found in the file')
+        return
+      }
+      
+      // If only one sheet, go directly to preview
+      if (sheetList.length === 1) {
+        const rawData = await parseExcelFile(selectedFile, sheetList[0].name)
+        const contacts = mapToContacts(rawData)
+        setPreviewData(contacts)
+        setStep('preview')
+      } else {
+        // Multiple sheets - let user select
+        setSheets(sheetList)
+        setSelectedSheets(sheetList.map(s => s.name)) // Select all by default
+        setStep('select-sheets')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to parse file')
+    }
+  }
+
+  const handleSheetToggle = (sheetName: string) => {
+    setSelectedSheets(prev => 
+      prev.includes(sheetName)
+        ? prev.filter(s => s !== sheetName)
+        : [...prev, sheetName]
+    )
+  }
+
+  const handleSheetsConfirm = async () => {
+    if (!file || selectedSheets.length === 0) return
+    
+    setError(null)
+    
+    try {
+      // Parse all selected sheets
+      const allSheetsData = await parseAllSheets(file)
+      const filteredData = allSheetsData.filter(s => selectedSheets.includes(s.sheetName))
+      
+      // Map and combine all contacts
+      const allContacts: PreviewContact[] = []
+      for (const { sheetName, data } of filteredData) {
+        const contacts = mapToContacts(data, sheetName)
+        allContacts.push(...contacts)
+      }
+      
+      setPreviewData(allContacts)
+      setStep('preview')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to parse sheets')
     }
   }
 
@@ -130,6 +182,7 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
               <h2 className="text-lg font-medium text-slate-100">Import from Excel</h2>
               <p className="text-slate-500 text-sm">
                 {step === 'upload' && 'Upload your Excel file'}
+                {step === 'select-sheets' && 'Select which sheets to import'}
                 {step === 'preview' && `${validContacts.length} contacts ready to import`}
                 {step === 'importing' && 'Importing contacts...'}
                 {step === 'complete' && 'Import complete'}
@@ -183,19 +236,53 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
                 <div className="flex items-start gap-3">
                   <Info className="text-slate-500 flex-shrink-0 mt-0.5" size={16} />
                   <div className="text-sm">
-                    <p className="text-slate-400 font-medium mb-2">Expected columns:</p>
+                    <p className="text-slate-400 font-medium mb-2">Supported columns:</p>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-500">
                       <span>• Name (required)</span>
                       <span>• Institution / Company</span>
                       <span>• Email</span>
                       <span>• Priority (1-5)</span>
                       <span>• Phone</span>
-                      <span>• Last Interaction (date)</span>
+                      <span>• Date of last interaction</span>
                       <span>• Location</span>
                       <span>• Notes / Details</span>
                     </div>
+                    <p className="text-slate-500 mt-2">Extra columns will be added to notes.</p>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sheet Selection Step */}
+          {step === 'select-sheets' && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Layers className="text-slate-500" size={18} />
+                <p className="text-slate-300">Select sheets to import:</p>
+              </div>
+              <div className="space-y-2 max-h-60 overflow-auto">
+                {sheets.map(sheet => (
+                  <label
+                    key={sheet.name}
+                    className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
+                      selectedSheets.includes(sheet.name)
+                        ? 'border-slate-600 bg-slate-800/50'
+                        : 'border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedSheets.includes(sheet.name)}
+                        onChange={() => handleSheetToggle(sheet.name)}
+                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-slate-500 focus:ring-0 focus:ring-offset-0"
+                      />
+                      <span className="text-slate-200 font-medium">{sheet.name}</span>
+                    </div>
+                    <span className="text-slate-500 text-sm">{sheet.rowCount} rows</span>
+                  </label>
+                ))}
               </div>
             </div>
           )}
@@ -303,9 +390,24 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
             </button>
           )}
 
-          {step === 'preview' && (
+          {step === 'select-sheets' && (
             <>
               <button onClick={resetState} className="btn-secondary">
+                Back
+              </button>
+              <button
+                onClick={handleSheetsConfirm}
+                disabled={selectedSheets.length === 0}
+                className="btn-primary"
+              >
+                Continue with {selectedSheets.length} sheet{selectedSheets.length !== 1 ? 's' : ''}
+              </button>
+            </>
+          )}
+
+          {step === 'preview' && (
+            <>
+              <button onClick={() => sheets.length > 1 ? setStep('select-sheets') : resetState()} className="btn-secondary">
                 Back
               </button>
               <button
