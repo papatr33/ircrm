@@ -253,7 +253,7 @@ export default function FileUpload({ contactId, attachments, onAttachmentsChange
     <div className="space-y-4">
       {/* Upload area */}
       <div 
-        className="border border-dashed border-slate-700 rounded-xl p-6 text-center hover:border-slate-600 transition-colors cursor-pointer bg-slate-800/20"
+        className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer"
         onClick={() => fileInputRef.current?.click()}
       >
         <input
@@ -267,16 +267,18 @@ export default function FileUpload({ contactId, attachments, onAttachmentsChange
         
         {uploading ? (
           <div className="flex flex-col items-center gap-2 py-2">
-            <Loader2 className="animate-spin text-slate-400" size={24} />
-            <p className="text-slate-500 text-sm">Uploading...</p>
+            <Loader2 className="animate-spin text-indigo-500" size={24} />
+            <p className="text-gray-500 text-sm">Uploading...</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 py-2">
-            <Upload className="text-slate-600" size={24} />
-            <p className="text-slate-400 text-sm font-medium">
-              Click to upload
+            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+              <Upload className="text-gray-400" size={22} />
+            </div>
+            <p className="text-gray-600 text-sm font-medium">
+              Click to upload files
             </p>
-            <p className="text-slate-600 text-xs">
+            <p className="text-gray-400 text-xs">
               PDF, Word, Excel, images, emails
             </p>
           </div>
@@ -284,7 +286,7 @@ export default function FileUpload({ contactId, attachments, onAttachmentsChange
       </div>
 
       {uploadError && (
-        <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">
           <AlertCircle size={16} />
           {uploadError}
         </div>
@@ -297,13 +299,13 @@ export default function FileUpload({ contactId, attachments, onAttachmentsChange
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-2 text-xs font-medium transition-colors ${
-              hasActiveFilters ? 'text-slate-200' : 'text-slate-500 hover:text-slate-400'
+              hasActiveFilters ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
             }`}
           >
             <Filter size={14} />
             {hasActiveFilters ? 'Filters active' : 'Filter files'}
             {hasActiveFilters && (
-              <span className="px-1.5 py-0.5 bg-slate-700 rounded text-slate-300">
+              <span className="px-1.5 py-0.5 bg-indigo-100 rounded text-indigo-600">
                 {filteredAttachments.length}/{attachments.length}
               </span>
             )}
@@ -311,17 +313,17 @@ export default function FileUpload({ contactId, attachments, onAttachmentsChange
           
           {/* Filter controls */}
           {showFilters && (
-            <div className="p-3 bg-slate-800/40 rounded-lg space-y-3 animate-fade-in">
+            <div className="p-4 bg-gray-50 rounded-xl space-y-3 animate-fade-in">
               {/* File type filter */}
               <div className="space-y-1.5">
-                <label className="flex items-center gap-1.5 text-xs text-slate-500">
+                <label className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
                   <File size={12} />
                   File Type
                 </label>
                 <select
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 >
                   <option value="">All types</option>
                   {availableCategories.map(category => (
@@ -334,14 +336,14 @@ export default function FileUpload({ contactId, attachments, onAttachmentsChange
               
               {/* Date filter */}
               <div className="space-y-1.5">
-                <label className="flex items-center gap-1.5 text-xs text-slate-500">
+                <label className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
                   <Calendar size={12} />
                   Date Uploaded
                 </label>
                 <select
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-slate-500"
+                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 >
                   <option value="">All dates</option>
                   {availableDates.map(([key, label]) => (
@@ -356,7 +358,7 @@ export default function FileUpload({ contactId, attachments, onAttachmentsChange
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   <X size={12} />
                   Clear filters
@@ -371,7 +373,7 @@ export default function FileUpload({ contactId, attachments, onAttachmentsChange
       {attachments.length > 0 && (
         <div className="space-y-2">
           {filteredAttachments.length === 0 ? (
-            <p className="text-slate-500 text-sm text-center py-4">
+            <p className="text-gray-400 text-sm text-center py-4">
               No files match your filters
             </p>
           ) : (
@@ -382,17 +384,17 @@ export default function FileUpload({ contactId, attachments, onAttachmentsChange
               return (
                 <div 
                   key={attachment.id}
-                  className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg group"
+                  className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl group transition-colors"
                 >
-                  <div className="w-9 h-9 bg-slate-700/50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <FileIcon className="text-slate-400" size={16} />
+                  <div className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <FileIcon className="text-gray-400" size={18} />
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <p className="text-slate-300 text-sm font-medium truncate">
+                    <p className="text-gray-700 text-sm font-medium truncate">
                       {attachment.file_name}
                     </p>
-                    <p className="text-slate-600 text-xs">
+                    <p className="text-gray-400 text-xs">
                       {formatFileSize(attachment.file_size)}
                       {attachment.file_size && ' · '}
                       {formatDate(attachment.created_at)}
@@ -402,21 +404,21 @@ export default function FileUpload({ contactId, attachments, onAttachmentsChange
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleDownload(attachment)}
-                      className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors"
+                      className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                       title="Download"
                     >
-                      <Download size={14} />
+                      <Download size={16} />
                     </button>
                     <button
                       onClick={() => handleDelete(attachment)}
                       disabled={isDeleting}
-                      className="p-1.5 text-slate-500 hover:text-red-400 transition-colors disabled:opacity-50"
+                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                       title="Delete"
                     >
                       {isDeleting ? (
-                        <Loader2 className="animate-spin" size={14} />
+                        <Loader2 className="animate-spin" size={16} />
                       ) : (
-                        <Trash2 size={14} />
+                        <Trash2 size={16} />
                       )}
                     </button>
                   </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import { Contact } from '@/types'
 import { User, Mail, Phone, MapPin, FileText, Loader2, Building2, Calendar, Star } from 'lucide-react'
 
@@ -61,18 +61,18 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+        <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">
           {error}
         </div>
       )}
 
       {/* Name */}
       <div className="space-y-2">
-        <label htmlFor="name" className="block text-sm font-medium text-slate-400">
-          Name <span className="text-red-400">*</span>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          Name <span className="text-red-500">*</span>
         </label>
         <div className="relative">
-          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input
             id="name"
             name="name"
@@ -89,11 +89,11 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
       {/* Email & Phone - side by side on larger screens */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-slate-400">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             Email
           </label>
           <div className="relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               id="email"
               name="email"
@@ -107,11 +107,11 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="phone" className="block text-sm font-medium text-slate-400">
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
             Phone
           </label>
           <div className="relative">
-            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               id="phone"
               name="phone"
@@ -128,11 +128,11 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
       {/* Institution & Location - side by side */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="institution" className="block text-sm font-medium text-slate-400">
+          <label htmlFor="institution" className="block text-sm font-medium text-gray-700">
             Institution
           </label>
           <div className="relative">
-            <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               id="institution"
               name="institution"
@@ -146,11 +146,11 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="location" className="block text-sm font-medium text-slate-400">
+          <label htmlFor="location" className="block text-sm font-medium text-gray-700">
             Location
           </label>
           <div className="relative">
-            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               id="location"
               name="location"
@@ -167,11 +167,11 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
       {/* Last Interaction Date & Priority - side by side */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="last_interaction_date" className="block text-sm font-medium text-slate-400">
+          <label htmlFor="last_interaction_date" className="block text-sm font-medium text-gray-700">
             Last Interaction
           </label>
           <div className="relative">
-            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               id="last_interaction_date"
               name="last_interaction_date"
@@ -184,17 +184,17 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="priority" className="block text-sm font-medium text-slate-400">
+          <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
             Priority
           </label>
           <div className="relative">
-            <Star className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <Star className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <select
               id="priority"
               name="priority"
               value={formData.priority}
               onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
-              className="input-field pl-12 appearance-none cursor-pointer"
+              className="input-field pl-12 appearance-none cursor-pointer pr-10"
             >
               <option value="">Select priority</option>
               <option value="1">1 - Highest</option>
@@ -203,17 +203,22 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
               <option value="4">4 - Low</option>
               <option value="5">5 - Lowest</option>
             </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Details */}
       <div className="space-y-2">
-        <label htmlFor="details" className="block text-sm font-medium text-slate-400">
+        <label htmlFor="details" className="block text-sm font-medium text-gray-700">
           Notes
         </label>
         <div className="relative">
-          <FileText className="absolute left-4 top-3.5 text-slate-600" size={18} />
+          <FileText className="absolute left-4 top-3.5 text-gray-400" size={18} />
           <textarea
             id="details"
             name="details"

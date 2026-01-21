@@ -30,16 +30,16 @@ function getPriorityLabel(priority: number | null): string {
   }
 }
 
-// Priority color helper
-function getPriorityColor(priority: number | null): string {
-  if (!priority) return ''
+// Priority style helper
+function getPriorityStyle(priority: number | null): { bg: string; text: string } {
+  if (!priority) return { bg: '', text: '' }
   switch (priority) {
-    case 1: return 'text-red-400 bg-red-500/10'
-    case 2: return 'text-orange-400 bg-orange-500/10'
-    case 3: return 'text-yellow-400 bg-yellow-500/10'
-    case 4: return 'text-blue-400 bg-blue-500/10'
-    case 5: return 'text-slate-400 bg-slate-500/10'
-    default: return 'text-slate-500'
+    case 1: return { bg: 'bg-red-50', text: 'text-red-600' }
+    case 2: return { bg: 'bg-orange-50', text: 'text-orange-600' }
+    case 3: return { bg: 'bg-amber-50', text: 'text-amber-600' }
+    case 4: return { bg: 'bg-blue-50', text: 'text-blue-600' }
+    case 5: return { bg: 'bg-gray-100', text: 'text-gray-500' }
+    default: return { bg: 'bg-gray-100', text: 'text-gray-500' }
   }
 }
 
@@ -149,11 +149,11 @@ export default function ContactDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <main className="max-w-3xl mx-auto px-6 py-10">
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-slate-700 border-t-slate-400 rounded-full animate-spin" />
+            <div className="w-10 h-10 border-2 border-gray-200 border-t-indigo-500 rounded-full animate-spin" />
           </div>
         </main>
       </div>
@@ -162,17 +162,17 @@ export default function ContactDetailPage() {
 
   if (error || !contact) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <main className="max-w-3xl mx-auto px-6 py-10">
           <Link 
             href="/dashboard" 
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-300 transition-colors text-sm mb-8"
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors text-sm mb-8"
           >
             <ArrowLeft size={16} />
-            Back
+            Back to contacts
           </Link>
-          <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
+          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600">
             <AlertCircle size={18} />
             {error || 'Contact not found'}
           </div>
@@ -181,18 +181,20 @@ export default function ContactDetailPage() {
     )
   }
 
+  const priorityStyle = getPriorityStyle(contact.priority)
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <main className="max-w-3xl mx-auto px-6 py-10">
+      <main className="max-w-3xl mx-auto px-6 py-8">
         {/* Back link */}
         <Link 
           href="/dashboard" 
-          className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-300 transition-colors text-sm mb-8"
+          className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors text-sm mb-6"
         >
           <ArrowLeft size={16} />
-          Back
+          Back to contacts
         </Link>
 
         <div className="space-y-6">
@@ -201,10 +203,10 @@ export default function ContactDetailPage() {
             {isEditing ? (
               <>
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-medium text-slate-100">Edit Contact</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">Edit Contact</h2>
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="p-2 text-slate-500 hover:text-slate-300 transition-colors"
+                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <X size={18} />
                   </button>
@@ -212,7 +214,7 @@ export default function ContactDetailPage() {
                 <ContactForm 
                   initialData={contact} 
                   onSubmit={handleUpdate}
-                  submitLabel="Update"
+                  submitLabel="Update Contact"
                 />
               </>
             ) : (
@@ -220,26 +222,26 @@ export default function ContactDetailPage() {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-6">
                   <div>
-                    <div className="flex items-center gap-3">
-                      <h1 className="text-xl font-semibold text-slate-100">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h1 className="text-2xl font-bold text-gray-900">
                         {contact.name}
                       </h1>
                       {contact.priority && (
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(contact.priority)}`}>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${priorityStyle.bg} ${priorityStyle.text}`}>
                           <Star size={12} />
                           P{contact.priority} - {getPriorityLabel(contact.priority)}
                         </span>
                       )}
                     </div>
                     {contact.institution && (
-                      <p className="flex items-center gap-1.5 text-slate-400 text-sm mt-1">
-                        <Building2 size={14} />
+                      <p className="flex items-center gap-2 text-gray-600 text-base mt-2">
+                        <Building2 size={16} className="text-gray-400" />
                         {contact.institution}
                       </p>
                     )}
                     {contact.location && (
-                      <p className="flex items-center gap-1.5 text-slate-500 text-sm mt-1">
-                        <MapPin size={14} />
+                      <p className="flex items-center gap-2 text-gray-500 text-sm mt-1">
+                        <MapPin size={14} className="text-gray-400" />
                         {contact.location}
                       </p>
                     )}
@@ -247,21 +249,21 @@ export default function ContactDetailPage() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="p-2 text-slate-500 hover:text-slate-300 transition-colors"
+                      className="p-2.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                       title="Edit"
                     >
-                      <Edit2 size={16} />
+                      <Edit2 size={18} />
                     </button>
                     <button
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="p-2 text-slate-500 hover:text-red-400 transition-colors disabled:opacity-50"
+                      className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                       title="Delete"
                     >
                       {isDeleting ? (
-                        <Loader2 className="animate-spin" size={16} />
+                        <Loader2 className="animate-spin" size={18} />
                       ) : (
-                        <Trash2 size={16} />
+                        <Trash2 size={18} />
                       )}
                     </button>
                   </div>
@@ -272,41 +274,43 @@ export default function ContactDetailPage() {
                   {contact.email && (
                     <a 
                       href={`mailto:${contact.email}`}
-                      className="inline-flex items-center gap-2 px-3 py-2 bg-slate-800/50 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-colors text-sm"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-xl text-gray-700 transition-colors text-sm font-medium"
                     >
-                      <Mail size={14} />
+                      <Mail size={16} className="text-gray-400" />
                       {contact.email}
                     </a>
                   )}
                   {contact.phone && (
                     <a 
                       href={`tel:${contact.phone}`}
-                      className="inline-flex items-center gap-2 px-3 py-2 bg-slate-800/50 rounded-lg text-slate-300 hover:bg-slate-700/50 transition-colors text-sm"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-xl text-gray-700 transition-colors text-sm font-medium"
                     >
-                      <Phone size={14} />
+                      <Phone size={16} className="text-gray-400" />
                       {contact.phone}
                     </a>
                   )}
                   {contact.last_interaction_date && (
-                    <span className="inline-flex items-center gap-2 px-3 py-2 bg-slate-800/50 rounded-lg text-slate-400 text-sm">
-                      <Calendar size={14} />
-                      Last interaction: {formatInteractionDate(contact.last_interaction_date)}
+                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-xl text-indigo-700 text-sm font-medium">
+                      <Calendar size={16} />
+                      Last: {formatInteractionDate(contact.last_interaction_date)}
                     </span>
                   )}
                 </div>
 
                 {/* Details */}
                 {contact.details ? (
-                  <div>
-                    <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Notes</h3>
-                    <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
+                  <div className="pt-4 border-t border-gray-100">
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Notes</h3>
+                    <p className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">
                       {contact.details}
                     </p>
                   </div>
                 ) : (
-                  <p className="text-slate-600 text-sm italic">
-                    No notes added
-                  </p>
+                  <div className="pt-4 border-t border-gray-100">
+                    <p className="text-gray-400 text-sm italic">
+                      No notes added yet
+                    </p>
+                  </div>
                 )}
               </>
             )}
@@ -315,12 +319,14 @@ export default function ContactDetailPage() {
           {/* Files Section - Below Contact Info */}
           <div className="card">
             <div className="flex items-center gap-2 mb-5">
-              <Paperclip className="text-slate-500" size={18} />
-              <h2 className="text-lg font-medium text-slate-100">
+              <div className="w-8 h-8 bg-violet-50 rounded-lg flex items-center justify-center">
+                <Paperclip className="text-violet-500" size={16} />
+              </div>
+              <h2 className="text-lg font-semibold text-gray-900">
                 Files
               </h2>
               {attachments.length > 0 && (
-                <span className="px-2 py-0.5 bg-slate-800 rounded-full text-xs text-slate-400">
+                <span className="px-2 py-0.5 bg-gray-100 rounded-full text-xs font-medium text-gray-500">
                   {attachments.length}
                 </span>
               )}

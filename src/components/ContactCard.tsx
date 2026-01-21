@@ -11,16 +11,16 @@ function formatInteractionDate(dateString: string | null): string | null {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-// Priority color helper
-function getPriorityColor(priority: number | null): string {
-  if (!priority) return ''
+// Priority badge colors
+function getPriorityStyle(priority: number | null): { bg: string; text: string; label: string } {
+  if (!priority) return { bg: '', text: '', label: '' }
   switch (priority) {
-    case 1: return 'text-red-400'
-    case 2: return 'text-orange-400'
-    case 3: return 'text-yellow-400'
-    case 4: return 'text-blue-400'
-    case 5: return 'text-slate-400'
-    default: return 'text-slate-500'
+    case 1: return { bg: 'bg-red-50', text: 'text-red-600', label: 'Highest' }
+    case 2: return { bg: 'bg-orange-50', text: 'text-orange-600', label: 'High' }
+    case 3: return { bg: 'bg-amber-50', text: 'text-amber-600', label: 'Medium' }
+    case 4: return { bg: 'bg-blue-50', text: 'text-blue-600', label: 'Low' }
+    case 5: return { bg: 'bg-gray-50', text: 'text-gray-500', label: 'Lowest' }
+    default: return { bg: 'bg-gray-50', text: 'text-gray-500', label: '' }
   }
 }
 
@@ -29,63 +29,69 @@ interface ContactCardProps {
 }
 
 export default function ContactCard({ contact }: ContactCardProps) {
+  const priorityStyle = getPriorityStyle(contact.priority)
+
   return (
     <Link href={`/dashboard/${contact.id}`}>
-      <div className="group p-5 bg-slate-900/30 border border-slate-800/40 rounded-xl hover:bg-slate-800/40 hover:border-slate-700/50 transition-all duration-300">
+      <div className="group p-5 bg-white border border-gray-100 rounded-2xl hover:border-gray-200 hover:shadow-lg hover:shadow-gray-100 transition-all duration-300">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            {/* Name */}
-            <h3 className="text-base font-medium text-slate-100 group-hover:text-white transition-colors">
-              {contact.name}
-            </h3>
+            {/* Name & Priority */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h3 className="text-base font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                {contact.name}
+              </h3>
+              {contact.priority && (
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${priorityStyle.bg} ${priorityStyle.text}`}>
+                  <Star size={10} />
+                  P{contact.priority}
+                </span>
+              )}
+            </div>
+
+            {/* Institution */}
+            {contact.institution && (
+              <p className="text-gray-500 text-sm mt-1 flex items-center gap-1.5">
+                <Building2 size={14} className="text-gray-400" />
+                {contact.institution}
+              </p>
+            )}
 
             {/* Details preview */}
             {contact.details && (
-              <p className="text-slate-500 text-sm mt-1.5 line-clamp-1">
+              <p className="text-gray-400 text-sm mt-2 line-clamp-1">
                 {contact.details}
               </p>
             )}
 
             {/* Meta info */}
-            <div className="flex flex-wrap items-center gap-4 mt-3">
-              {contact.institution && (
-                <span className="flex items-center gap-1.5 text-slate-500 text-xs">
-                  <Building2 size={12} />
-                  {contact.institution}
-                </span>
-              )}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3">
               {contact.location && (
-                <span className="flex items-center gap-1.5 text-slate-500 text-xs">
+                <span className="flex items-center gap-1.5 text-gray-400 text-xs">
                   <MapPin size={12} />
                   {contact.location}
                 </span>
               )}
               {contact.email && (
-                <span className="flex items-center gap-1.5 text-slate-500 text-xs">
+                <span className="flex items-center gap-1.5 text-gray-400 text-xs">
                   <Mail size={12} />
-                  <span className="truncate max-w-[140px]">{contact.email}</span>
+                  <span className="truncate max-w-[160px]">{contact.email}</span>
                 </span>
               )}
               {contact.phone && (
-                <span className="flex items-center gap-1.5 text-slate-500 text-xs">
+                <span className="flex items-center gap-1.5 text-gray-400 text-xs">
                   <Phone size={12} />
                   {contact.phone}
                 </span>
               )}
               {contact.last_interaction_date && (
-                <span className="flex items-center gap-1.5 text-slate-500 text-xs">
+                <span className="flex items-center gap-1.5 text-gray-400 text-xs">
                   <Calendar size={12} />
                   {formatInteractionDate(contact.last_interaction_date)}
                 </span>
               )}
-              {contact.priority && (
-                <span className={`flex items-center gap-1.5 text-xs ${getPriorityColor(contact.priority)}`}>
-                  <Star size={12} />
-                  P{contact.priority}
-                </span>
-              )}
               {contact.attachment_count && contact.attachment_count > 0 && (
-                <span className="flex items-center gap-1.5 text-slate-400 text-xs">
+                <span className="flex items-center gap-1.5 text-indigo-500 text-xs font-medium">
                   <Paperclip size={12} />
                   {contact.attachment_count}
                 </span>
@@ -94,10 +100,12 @@ export default function ContactCard({ contact }: ContactCardProps) {
           </div>
 
           {/* Arrow */}
-          <ChevronRight 
-            className="text-slate-700 group-hover:text-slate-500 transition-colors flex-shrink-0 mt-1" 
-            size={18} 
-          />
+          <div className="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-indigo-50 flex items-center justify-center transition-colors flex-shrink-0">
+            <ChevronRight 
+              className="text-gray-300 group-hover:text-indigo-500 transition-colors" 
+              size={18} 
+            />
+          </div>
         </div>
       </div>
     </Link>

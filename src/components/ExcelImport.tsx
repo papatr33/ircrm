@@ -170,17 +170,17 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
   const invalidContacts = previewData.length - validContacts.length
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl animate-fade-in overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/20 backdrop-blur-sm">
+      <div className="w-full max-w-2xl bg-white border border-gray-100 rounded-2xl shadow-2xl animate-fade-in overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center">
-              <FileSpreadsheet className="text-slate-400" size={20} />
+            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+              <FileSpreadsheet className="text-indigo-500" size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-medium text-slate-100">Import from Excel</h2>
-              <p className="text-slate-500 text-sm">
+              <h2 className="text-lg font-semibold text-gray-900">Import from Excel</h2>
+              <p className="text-gray-500 text-sm">
                 {step === 'upload' && 'Upload your Excel file'}
                 {step === 'select-sheets' && 'Select which sheets to import'}
                 {step === 'preview' && `${validContacts.length} contacts ready to import`}
@@ -192,7 +192,7 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
           <button
             onClick={handleClose}
             disabled={importing}
-            className="p-2 text-slate-500 hover:text-slate-300 transition-colors disabled:opacity-50"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
           >
             <X size={20} />
           </button>
@@ -202,7 +202,7 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
         <div className="p-6">
           {/* Error message */}
           {error && (
-            <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 mb-4">
+            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 mb-4">
               <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
               <p className="text-sm">{error}</p>
             </div>
@@ -213,13 +213,15 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
             <div>
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-700 hover:border-slate-600 rounded-xl p-10 text-center cursor-pointer transition-colors"
+                className="border-2 border-dashed border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30 rounded-2xl p-10 text-center cursor-pointer transition-all"
               >
-                <Upload className="mx-auto text-slate-600 mb-4" size={40} />
-                <p className="text-slate-300 font-medium mb-2">
+                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Upload className="text-indigo-500" size={28} />
+                </div>
+                <p className="text-gray-700 font-medium mb-2">
                   Click to upload or drag and drop
                 </p>
-                <p className="text-slate-500 text-sm">
+                <p className="text-gray-400 text-sm">
                   Excel files (.xlsx, .xls) or CSV
                 </p>
               </div>
@@ -232,12 +234,12 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
               />
 
               {/* Column mapping info */}
-              <div className="mt-6 p-4 bg-slate-800/50 rounded-xl">
+              <div className="mt-6 p-4 bg-gray-50 rounded-xl">
                 <div className="flex items-start gap-3">
-                  <Info className="text-slate-500 flex-shrink-0 mt-0.5" size={16} />
+                  <Info className="text-gray-400 flex-shrink-0 mt-0.5" size={16} />
                   <div className="text-sm">
-                    <p className="text-slate-400 font-medium mb-2">Supported columns:</p>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-500">
+                    <p className="text-gray-600 font-medium mb-2">Supported columns:</p>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-gray-500">
                       <span>• Name (required)</span>
                       <span>• Institution / Company</span>
                       <span>• Email</span>
@@ -247,7 +249,7 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
                       <span>• Location</span>
                       <span>• Notes / Details</span>
                     </div>
-                    <p className="text-slate-500 mt-2">Extra columns will be added to notes.</p>
+                    <p className="text-gray-400 mt-2">Extra columns will be added to notes.</p>
                   </div>
                 </div>
               </div>
@@ -258,17 +260,17 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
           {step === 'select-sheets' && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Layers className="text-slate-500" size={18} />
-                <p className="text-slate-300">Select sheets to import:</p>
+                <Layers className="text-gray-400" size={18} />
+                <p className="text-gray-700 font-medium">Select sheets to import:</p>
               </div>
               <div className="space-y-2 max-h-60 overflow-auto">
                 {sheets.map(sheet => (
                   <label
                     key={sheet.name}
-                    className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
+                    className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${
                       selectedSheets.includes(sheet.name)
-                        ? 'border-slate-600 bg-slate-800/50'
-                        : 'border-slate-800 hover:border-slate-700'
+                        ? 'border-indigo-200 bg-indigo-50/50'
+                        : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -276,11 +278,11 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
                         type="checkbox"
                         checked={selectedSheets.includes(sheet.name)}
                         onChange={() => handleSheetToggle(sheet.name)}
-                        className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-slate-500 focus:ring-0 focus:ring-offset-0"
+                        className="w-4 h-4 rounded border-gray-300 text-indigo-500 focus:ring-indigo-500"
                       />
-                      <span className="text-slate-200 font-medium">{sheet.name}</span>
+                      <span className="text-gray-700 font-medium">{sheet.name}</span>
                     </div>
-                    <span className="text-slate-500 text-sm">{sheet.rowCount} rows</span>
+                    <span className="text-gray-400 text-sm">{sheet.rowCount} rows</span>
                   </label>
                 ))}
               </div>
@@ -291,7 +293,7 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
           {step === 'preview' && (
             <div>
               {invalidContacts > 0 && (
-                <div className="flex items-start gap-3 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-400 mb-4">
+                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-100 rounded-xl text-amber-700 mb-4">
                   <AlertCircle size={18} className="mt-0.5 flex-shrink-0" />
                   <p className="text-sm">
                     {invalidContacts} row{invalidContacts > 1 ? 's' : ''} will be skipped (missing name)
@@ -299,29 +301,29 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
                 </div>
               )}
 
-              <div className="max-h-80 overflow-auto rounded-xl border border-slate-800">
+              <div className="max-h-80 overflow-auto rounded-xl border border-gray-100">
                 <table className="w-full text-sm">
-                  <thead className="bg-slate-800/50 sticky top-0">
+                  <thead className="bg-gray-50 sticky top-0">
                     <tr>
-                      <th className="text-left px-4 py-3 text-slate-400 font-medium">Name</th>
-                      <th className="text-left px-4 py-3 text-slate-400 font-medium">Institution</th>
-                      <th className="text-left px-4 py-3 text-slate-400 font-medium">Email</th>
-                      <th className="text-left px-4 py-3 text-slate-400 font-medium">Priority</th>
+                      <th className="text-left px-4 py-3 text-gray-500 font-medium">Name</th>
+                      <th className="text-left px-4 py-3 text-gray-500 font-medium">Institution</th>
+                      <th className="text-left px-4 py-3 text-gray-500 font-medium">Email</th>
+                      <th className="text-left px-4 py-3 text-gray-500 font-medium">Priority</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800">
+                  <tbody className="divide-y divide-gray-50">
                     {validContacts.slice(0, 10).map((contact, index) => (
-                      <tr key={index} className="hover:bg-slate-800/30">
-                        <td className="px-4 py-3 text-slate-200">{contact.name}</td>
-                        <td className="px-4 py-3 text-slate-400">{contact.institution || '-'}</td>
-                        <td className="px-4 py-3 text-slate-400">{contact.email || '-'}</td>
-                        <td className="px-4 py-3 text-slate-400">{contact.priority || '-'}</td>
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-gray-900 font-medium">{contact.name}</td>
+                        <td className="px-4 py-3 text-gray-500">{contact.institution || '-'}</td>
+                        <td className="px-4 py-3 text-gray-500">{contact.email || '-'}</td>
+                        <td className="px-4 py-3 text-gray-500">{contact.priority || '-'}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {validContacts.length > 10 && (
-                  <div className="px-4 py-3 text-center text-slate-500 text-sm bg-slate-800/30">
+                  <div className="px-4 py-3 text-center text-gray-400 text-sm bg-gray-50 border-t border-gray-100">
                     ... and {validContacts.length - 10} more contacts
                   </div>
                 )}
@@ -333,16 +335,18 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
           {step === 'importing' && (
             <div className="py-8">
               <div className="flex items-center justify-center mb-6">
-                <Loader2 className="animate-spin text-slate-400" size={40} />
+                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center">
+                  <Loader2 className="animate-spin text-indigo-500" size={32} />
+                </div>
               </div>
               <div className="mb-4">
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-slate-400">{progress.message}</span>
-                  <span className="text-slate-500">{progress.percent}%</span>
+                  <span className="text-gray-600">{progress.message}</span>
+                  <span className="text-gray-400 font-medium">{progress.percent}%</span>
                 </div>
-                <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-slate-600 to-slate-500 transition-all duration-300"
+                    className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-300"
                     style={{ width: `${progress.percent}%` }}
                   />
                 </div>
@@ -354,24 +358,24 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
           {step === 'complete' && result && (
             <div className="py-4">
               <div className="flex items-center justify-center mb-6">
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center">
-                  <CheckCircle className="text-green-400" size={32} />
+                <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center">
+                  <CheckCircle className="text-emerald-500" size={32} />
                 </div>
               </div>
               <div className="text-center mb-6">
-                <p className="text-xl font-medium text-slate-100 mb-2">
+                <p className="text-2xl font-bold text-gray-900 mb-2">
                   {result.imported} contacts imported
                 </p>
                 {result.skipped > 0 && (
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-gray-500 text-sm">
                     {result.skipped} skipped
                   </p>
                 )}
               </div>
               {result.errors.length > 0 && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                  <p className="text-red-400 text-sm font-medium mb-2">Some errors occurred:</p>
-                  <ul className="text-red-400/80 text-sm list-disc list-inside">
+                <div className="p-4 bg-red-50 border border-red-100 rounded-xl">
+                  <p className="text-red-600 text-sm font-medium mb-2">Some errors occurred:</p>
+                  <ul className="text-red-500 text-sm list-disc list-inside">
                     {result.errors.map((err, i) => (
                       <li key={i}>{err}</li>
                     ))}
@@ -383,7 +387,7 @@ export default function ExcelImport({ isOpen, onClose, onImportComplete }: Excel
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
           {step === 'upload' && (
             <button onClick={handleClose} className="btn-secondary">
               Cancel
