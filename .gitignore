@@ -37,3 +37,9 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Excel/data files (don't commit investor data)
+*.xlsx
+*.xls
+*.csv
+~$*
