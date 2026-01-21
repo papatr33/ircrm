@@ -2,7 +2,27 @@
 
 import Link from 'next/link'
 import { Contact } from '@/types'
-import { MapPin, Mail, Phone, Paperclip, ChevronRight } from 'lucide-react'
+import { MapPin, Mail, Phone, Paperclip, ChevronRight, Building2, Calendar, Star } from 'lucide-react'
+
+// Format date for display
+function formatInteractionDate(dateString: string | null): string | null {
+  if (!dateString) return null
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+// Priority color helper
+function getPriorityColor(priority: number | null): string {
+  if (!priority) return ''
+  switch (priority) {
+    case 1: return 'text-red-400'
+    case 2: return 'text-orange-400'
+    case 3: return 'text-yellow-400'
+    case 4: return 'text-blue-400'
+    case 5: return 'text-slate-400'
+    default: return 'text-slate-500'
+  }
+}
 
 interface ContactCardProps {
   contact: Contact & { attachment_count?: number }
@@ -28,6 +48,12 @@ export default function ContactCard({ contact }: ContactCardProps) {
 
             {/* Meta info */}
             <div className="flex flex-wrap items-center gap-4 mt-3">
+              {contact.institution && (
+                <span className="flex items-center gap-1.5 text-slate-500 text-xs">
+                  <Building2 size={12} />
+                  {contact.institution}
+                </span>
+              )}
               {contact.location && (
                 <span className="flex items-center gap-1.5 text-slate-500 text-xs">
                   <MapPin size={12} />
@@ -44,6 +70,18 @@ export default function ContactCard({ contact }: ContactCardProps) {
                 <span className="flex items-center gap-1.5 text-slate-500 text-xs">
                   <Phone size={12} />
                   {contact.phone}
+                </span>
+              )}
+              {contact.last_interaction_date && (
+                <span className="flex items-center gap-1.5 text-slate-500 text-xs">
+                  <Calendar size={12} />
+                  {formatInteractionDate(contact.last_interaction_date)}
+                </span>
+              )}
+              {contact.priority && (
+                <span className={`flex items-center gap-1.5 text-xs ${getPriorityColor(contact.priority)}`}>
+                  <Star size={12} />
+                  P{contact.priority}
                 </span>
               )}
               {contact.attachment_count && contact.attachment_count > 0 && (

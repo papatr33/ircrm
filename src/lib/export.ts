@@ -27,15 +27,25 @@ function formatDate(dateString: string): string {
   })
 }
 
+// Format interaction date for Excel
+function formatInteractionDate(dateString: string | null): string {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
 // Generate Excel file with contacts data
 function generateExcel(contacts: ContactWithAttachments[]): Blob {
   // Prepare data for Excel
   const excelData = contacts.map((contact, index) => ({
     '#': index + 1,
     'Name': contact.name,
+    'Institution': contact.institution || '',
     'Email': contact.email || '',
     'Phone': contact.phone || '',
     'Location': contact.location || '',
+    'Priority': contact.priority || '',
+    'Last Interaction': formatInteractionDate(contact.last_interaction_date),
     'Notes': contact.details || '',
     'Files Count': contact.attachments.length,
     'File Names': contact.attachments.map(a => a.file_name).join(', '),
@@ -51,9 +61,12 @@ function generateExcel(contacts: ContactWithAttachments[]): Blob {
   worksheet['!cols'] = [
     { wch: 5 },   // #
     { wch: 25 },  // Name
+    { wch: 25 },  // Institution
     { wch: 30 },  // Email
     { wch: 18 },  // Phone
     { wch: 20 },  // Location
+    { wch: 10 },  // Priority
+    { wch: 18 },  // Last Interaction
     { wch: 50 },  // Notes
     { wch: 12 },  // Files Count
     { wch: 40 },  // File Names

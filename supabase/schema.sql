@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS contacts (
   phone TEXT,
   location TEXT,
   details TEXT,
+  institution TEXT,
+  last_interaction_date DATE,
+  priority INTEGER CHECK (priority >= 1 AND priority <= 5),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

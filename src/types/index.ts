@@ -6,6 +6,9 @@ export interface Contact {
   phone: string | null
   location: string | null
   details: string | null
+  institution: string | null
+  last_interaction_date: string | null
+  priority: number | null
   created_at: string
   updated_at: string
 }

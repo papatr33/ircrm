@@ -8,7 +8,40 @@ import { Contact, Attachment } from '@/types'
 import Navbar from '@/components/Navbar'
 import ContactForm from '@/components/ContactForm'
 import FileUpload from '@/components/FileUpload'
-import { ArrowLeft, Trash2, Edit2, X, Mail, Phone, MapPin, Loader2, AlertCircle, Paperclip } from 'lucide-react'
+import { ArrowLeft, Trash2, Edit2, X, Mail, Phone, MapPin, Loader2, AlertCircle, Paperclip, Building2, Calendar, Star } from 'lucide-react'
+
+// Format date for display
+function formatInteractionDate(dateString: string | null): string | null {
+  if (!dateString) return null
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+}
+
+// Priority label helper
+function getPriorityLabel(priority: number | null): string {
+  if (!priority) return ''
+  switch (priority) {
+    case 1: return 'Highest'
+    case 2: return 'High'
+    case 3: return 'Medium'
+    case 4: return 'Low'
+    case 5: return 'Lowest'
+    default: return ''
+  }
+}
+
+// Priority color helper
+function getPriorityColor(priority: number | null): string {
+  if (!priority) return ''
+  switch (priority) {
+    case 1: return 'text-red-400 bg-red-500/10'
+    case 2: return 'text-orange-400 bg-orange-500/10'
+    case 3: return 'text-yellow-400 bg-yellow-500/10'
+    case 4: return 'text-blue-400 bg-blue-500/10'
+    case 5: return 'text-slate-400 bg-slate-500/10'
+    default: return 'text-slate-500'
+  }
+}
 
 export default function ContactDetailPage() {
   const router = useRouter()
@@ -187,9 +220,23 @@ export default function ContactDetailPage() {
                 {/* Header */}
                 <div className="flex items-start justify-between mb-6">
                   <div>
-                    <h1 className="text-xl font-semibold text-slate-100">
-                      {contact.name}
-                    </h1>
+                    <div className="flex items-center gap-3">
+                      <h1 className="text-xl font-semibold text-slate-100">
+                        {contact.name}
+                      </h1>
+                      {contact.priority && (
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(contact.priority)}`}>
+                          <Star size={12} />
+                          P{contact.priority} - {getPriorityLabel(contact.priority)}
+                        </span>
+                      )}
+                    </div>
+                    {contact.institution && (
+                      <p className="flex items-center gap-1.5 text-slate-400 text-sm mt-1">
+                        <Building2 size={14} />
+                        {contact.institution}
+                      </p>
+                    )}
                     {contact.location && (
                       <p className="flex items-center gap-1.5 text-slate-500 text-sm mt-1">
                         <MapPin size={14} />
@@ -220,7 +267,7 @@ export default function ContactDetailPage() {
                   </div>
                 </div>
 
-                {/* Contact methods */}
+                {/* Contact methods & last interaction */}
                 <div className="flex flex-wrap gap-2 mb-6">
                   {contact.email && (
                     <a 
@@ -239,6 +286,12 @@ export default function ContactDetailPage() {
                       <Phone size={14} />
                       {contact.phone}
                     </a>
+                  )}
+                  {contact.last_interaction_date && (
+                    <span className="inline-flex items-center gap-2 px-3 py-2 bg-slate-800/50 rounded-lg text-slate-400 text-sm">
+                      <Calendar size={14} />
+                      Last interaction: {formatInteractionDate(contact.last_interaction_date)}
+                    </span>
                   )}
                 </div>
 

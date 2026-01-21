@@ -8,7 +8,8 @@ import { exportAllData } from '@/lib/export'
 import { Contact } from '@/types'
 import Navbar from '@/components/Navbar'
 import ContactCard from '@/components/ContactCard'
-import { Plus, Search, MapPin, X, Users, AlertCircle, Download, Loader2, CheckCircle } from 'lucide-react'
+import { Plus, Search, MapPin, X, Users, AlertCircle, Download, Loader2, CheckCircle, Upload } from 'lucide-react'
+import ExcelImport from '@/components/ExcelImport'
 
 type ContactWithCount = Contact & { attachment_count?: number }
 
@@ -30,6 +31,9 @@ export default function DashboardPage() {
   const [exportProgress, setExportProgress] = useState({ message: '', percent: 0 })
   const [exportError, setExportError] = useState<string | null>(null)
   const [exportSuccess, setExportSuccess] = useState(false)
+  
+  // Import state
+  const [isImporting, setIsImporting] = useState(false)
 
   useEffect(() => {
     const checkAuthAndFetch = async () => {
@@ -93,7 +97,8 @@ export default function DashboardPage() {
         contact.name.toLowerCase().includes(query) ||
         contact.email?.toLowerCase().includes(query) ||
         contact.details?.toLowerCase().includes(query) ||
-        contact.phone?.includes(query)
+        contact.phone?.includes(query) ||
+        contact.institution?.toLowerCase().includes(query)
       )
     }
 
@@ -155,13 +160,21 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-3">
             <button
+              onClick={() => setIsImporting(true)}
+              className="btn-secondary flex items-center gap-2"
+              title="Import contacts from Excel"
+            >
+              <Upload size={18} />
+              <span className="hidden sm:inline">Import</span>
+            </button>
+            <button
               onClick={handleExport}
               disabled={isExporting || contacts.length === 0}
               className="btn-secondary flex items-center gap-2"
               title="Export all contacts and files"
             >
               <Download size={18} />
-              <span className="hidden sm:inline">Export All</span>
+              <span className="hidden sm:inline">Export</span>
             </button>
             <Link href="/dashboard/new" className="btn-primary flex items-center gap-2">
               <Plus size={18} />
@@ -169,6 +182,13 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+
+        {/* Import Modal */}
+        <ExcelImport
+          isOpen={isImporting}
+          onClose={() => setIsImporting(false)}
+          onImportComplete={fetchContacts}
+        />
 
         {/* Export Progress Modal */}
         {isExporting && (

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Contact } from '@/types'
-import { User, Mail, Phone, MapPin, FileText, Loader2 } from 'lucide-react'
+import { User, Mail, Phone, MapPin, FileText, Loader2, Building2, Calendar, Star } from 'lucide-react'
 
 interface ContactFormProps {
   initialData?: Partial<Contact>
@@ -17,6 +17,9 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
     phone: initialData?.phone || '',
     location: initialData?.location || '',
     details: initialData?.details || '',
+    institution: initialData?.institution || '',
+    last_interaction_date: initialData?.last_interaction_date || '',
+    priority: initialData?.priority?.toString() || '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -44,6 +47,9 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
         phone: formData.phone.trim() || null,
         location: formData.location.trim() || null,
         details: formData.details.trim() || null,
+        institution: formData.institution.trim() || null,
+        last_interaction_date: formData.last_interaction_date || null,
+        priority: formData.priority ? parseInt(formData.priority) : null,
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -119,22 +125,85 @@ export default function ContactForm({ initialData, onSubmit, submitLabel = 'Save
         </div>
       </div>
 
-      {/* Location */}
-      <div className="space-y-2">
-        <label htmlFor="location" className="block text-sm font-medium text-slate-400">
-          Location
-        </label>
-        <div className="relative">
-          <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
-          <input
-            id="location"
-            name="location"
-            type="text"
-            value={formData.location}
-            onChange={handleChange}
-            className="input-field pl-12"
-            placeholder="City, Country"
-          />
+      {/* Institution & Location - side by side */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="institution" className="block text-sm font-medium text-slate-400">
+            Institution
+          </label>
+          <div className="relative">
+            <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <input
+              id="institution"
+              name="institution"
+              type="text"
+              value={formData.institution}
+              onChange={handleChange}
+              className="input-field pl-12"
+              placeholder="Company or fund name"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="location" className="block text-sm font-medium text-slate-400">
+            Location
+          </label>
+          <div className="relative">
+            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <input
+              id="location"
+              name="location"
+              type="text"
+              value={formData.location}
+              onChange={handleChange}
+              className="input-field pl-12"
+              placeholder="City, Country"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Last Interaction Date & Priority - side by side */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="last_interaction_date" className="block text-sm font-medium text-slate-400">
+            Last Interaction
+          </label>
+          <div className="relative">
+            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <input
+              id="last_interaction_date"
+              name="last_interaction_date"
+              type="date"
+              value={formData.last_interaction_date}
+              onChange={handleChange}
+              className="input-field pl-12 cursor-pointer"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="priority" className="block text-sm font-medium text-slate-400">
+            Priority
+          </label>
+          <div className="relative">
+            <Star className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={18} />
+            <select
+              id="priority"
+              name="priority"
+              value={formData.priority}
+              onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
+              className="input-field pl-12 appearance-none cursor-pointer"
+            >
+              <option value="">Select priority</option>
+              <option value="1">1 - Highest</option>
+              <option value="2">2 - High</option>
+              <option value="3">3 - Medium</option>
+              <option value="4">4 - Low</option>
+              <option value="5">5 - Lowest</option>
+            </select>
+          </div>
         </div>
       </div>
 
